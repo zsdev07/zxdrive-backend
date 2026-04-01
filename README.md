@@ -1,10 +1,6 @@
 ---
-title: ZX Drive API
-emoji: ☁️
-colorFrom: blue
-colorTo: indigo
+title: ZX Drive API ☁️
 sdk: docker
-pinned: false
 ---
 
 # ZX Drive Backend API
