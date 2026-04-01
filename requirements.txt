@@ -1,0 +1,22 @@
+# Core API
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Telegram MTProto — battle-tested, no native .so needed
+telethon==1.36.0
+
+# C-based AES encryption for Telethon — makes uploads/downloads 10-20x faster
+# Without this, Telethon falls back to pure-Python crypto (very slow for 2GB files)
+cryptg==0.4.0
+
+# Session storage & utilities
+aiofiles==23.2.1
+python-dotenv==1.0.1
+
+# In-memory cache for sessions between requests
+cachetools==5.3.3
+
+# CORS, auth helpers
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4

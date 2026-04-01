@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: zxdrive-backend
+    runtime: docker
+    region: singapore          # closest to India — best latency
+    plan: free                 # upgrade to starter ($7/mo) for always-on
+    healthCheckPath: /health
+
+    # Render sets PORT automatically — our Dockerfile reads it
+    envVars:
+      - key: PORT
+        value: 10000           # Render's default port for Docker services
+      - key: ALLOWED_ORIGINS
+        value: "*"             # tighten to your Vercel URL after deploy
