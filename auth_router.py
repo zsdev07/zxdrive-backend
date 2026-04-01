@@ -87,6 +87,7 @@ async def verify_code(req: VerifyCodeRequest):
             phone_code_hash=req.phone_code_hash,
         )
 
+        await sm.save_session(req.session_id)   # persist auth so restarts don't expire it
         return AuthResponse(
             session_id=req.session_id,
             user_id=user.id,
@@ -128,6 +129,7 @@ async def verify_2fa(req: Verify2FARequest):
     try:
         user = await client.sign_in(password=req.password)
 
+        await sm.save_session(req.session_id)   # persist auth so restarts don't expire it
         return AuthResponse(
             session_id=req.session_id,
             user_id=user.id,
@@ -212,6 +214,7 @@ async def qr_status(req: QRStatusRequest):
         # Check if we're already authorised (user scanned the QR)
         if await client.is_user_authorized():
             me = await client.get_me()
+            await sm.save_session(req.session_id)   # persist QR auth
             return AuthResponse(
                 session_id=req.session_id,
                 user_id=me.id,
