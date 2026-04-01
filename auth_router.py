@@ -175,10 +175,19 @@ async def qr_start(api_id: int, api_hash: str):
         token_b64 = base64.urlsafe_b64encode(token_result.token).decode().rstrip("=")
         qr_url = f"tg://login?token={token_b64}"
 
+        # token_result.expires is a timezone-aware datetime, NOT a unix int.
+        # Subtracting an int from it causes: "unsupported operand type(s) for -: datetime and int"
+        from datetime import datetime, timezone as _tz
+        now = datetime.now(_tz.utc)
+        expires_dt = token_result.expires
+        if expires_dt.tzinfo is None:
+            expires_dt = expires_dt.replace(tzinfo=_tz.utc)
+        expires_in = max(0, int((expires_dt - now).total_seconds()))
+
         return QRCodeResponse(
             session_id=session_id,
             qr_url=qr_url,
-            expires_in=token_result.expires - int(asyncio.get_event_loop().time()),
+            expires_in=expires_in,
         )
 
     except ApiIdInvalidError:
