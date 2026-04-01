@@ -1,7 +1,4 @@
----
-title: ZX Drive API ☁️
-sdk: docker
----
+
 
 # ZX Drive Backend API
 
