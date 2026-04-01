@@ -8,6 +8,7 @@
 #   3. iter_download with chunk_size=512KB — streaming download, no server temp file.
 #   4. cryptg (compiled in Dockerfile) handles AES encryption in C, not Python.
 
+import io
 import mimetypes
 import logging
 from datetime import datetime, timezone
@@ -77,18 +78,20 @@ async def upload_file(
     mime_type   = file.content_type or mimetypes.guess_type(file_name)[0] or "application/octet-stream"
     uploaded_at = datetime.now(timezone.utc).isoformat()
 
-    # Get file size without loading whole file into memory
-    raw = file.file
-    raw.seek(0, 2)       # seek to end
-    file_size = raw.tell()
-    raw.seek(0)          # rewind to start
+    # Read into BytesIO — SpooledTemporaryFile may be purely in-memory (no file
+    # path on disk), which causes Telethon to raise:
+    #   "expected str, bytes or os.PathLike object, not NoneType"
+    # Wrapping in BytesIO always gives Telethon a valid readable buffer.
+    file_bytes = io.BytesIO(await file.read())
+    file_size  = file_bytes.getbuffer().nbytes
+    file_bytes.seek(0)
 
     caption = f"ZX Drive | {file_name} | {mime_type} | {file_size} | {uploaded_at}"
 
     try:
         message = await client.send_file(
             chat_id,
-            file=raw,                   # stream directly — no BytesIO wrapper
+            file=file_bytes,            # BytesIO — always works, no path needed
             caption=caption,
             force_document=True,
             part_size_kb=512,           # 512 KB per chunk
